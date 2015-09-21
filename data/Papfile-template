@@ -1,0 +1,98 @@
+<?php
+
+return array(
+
+    'application' => '',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Git settings
+    |--------------------------------------------------------------------------
+    |
+    | This is where we specify the Git repository associated with the project
+    | along with any login details that may be required.
+    |
+    */
+
+    'git' => array(
+        'repo'     => 'https://...',
+        'username' => '',
+        'password' => '',
+    ),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Shared file symlinks
+    |--------------------------------------------------------------------------
+    |
+    | This is a list of symlinks to shared files that should be set up as part
+    | of the deployment process.
+    |
+    | The key for each element should be the source file/directory within the
+    | 'shared' directory and the value should be the target under the project
+    | directory.
+    |
+    | e.g. 'image-uploads' => 'public/uploads/img'
+    |
+    */
+
+    'shared_file_symlinks' => array(
+    ),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Plugins
+    |--------------------------------------------------------------------------
+    |
+    | Plugins offer custom functionality and should be specified as an array
+    | of class names.
+    |
+    | A number of pre-built plugins already exist within the Paprika engine:
+    | - \Paprika\Plugin\LaravelPlugin
+    |
+    | Alternatively you can create your own project-specific plugin using
+    | 'paprika create-plugin' and add its class name to the array.
+    |
+    */
+
+    'plugins' => array(
+    ),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Environments
+    |--------------------------------------------------------------------------
+    |
+    | These are the environments that the project can be deployed to.
+    |
+    */
+
+    'environments' => array(
+
+        /*
+        |--------------------------------------------------------------------------
+        | Production Environment
+        |--------------------------------------------------------------------------
+        */
+
+        'production' => array(
+
+            'git_repo_branch' => 'master',
+
+            'ssh_address'  => '',
+            'ssh_port'     => '',
+            'ssh_username' => '',
+            'ssh_password' => '',
+
+            'pre_task_commands' => array(
+            ),
+
+            'deploy_dir' => '/var/www',
+
+            'releases_to_retain' => 5
+
+        )
+
+    )
+
+);

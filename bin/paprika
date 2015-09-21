@@ -1,0 +1,151 @@
+#!/usr/bin/env php
+<?php
+
+/*
+ * This file is part of the Paprika package.
+ *
+ * (c) David Frame <deframe@cryst.co.uk>
+ *
+ */
+
+include_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'bootstrap.php');
+
+$consoleOutput = new \Symfony\Component\Console\Output\ConsoleOutput();
+$consoleOutput->writeln('');
+
+$configFile = 'Papfile';
+
+if (file_exists($configFile)) {
+
+    $config = include_once($configFile);
+
+    // Ensure that the required config values exist.
+
+    if (!isset($config['application']) || empty($config['application'])) {
+        $consoleOutput->writeln('Error: You must specify an application name in your Papfile!');
+        exit;
+    }
+
+    if (!isset($config['git']['repo']) || empty($config['git']['repo'])) {
+        $consoleOutput->writeln('Error: You must specify a git repository in your Papfile!');
+        exit;
+    }
+
+    // Create Git repository instance.
+
+    $gitRepository = new Paprika\GitRepository($config['git']['repo']);
+
+    if (isset($config['git']['username']) && !empty($config['git']['username'])) {
+        $gitRepository->setUsername($config['git']['username']);
+    }
+
+    if (isset($config['git']['password']) && !empty($config['git']['password'])) {
+        $gitRepository->setPassword($config['git']['password']);
+    }
+
+    // Create Paprika application instance with the loaded config.
+
+    $paprika = new Paprika\Application(
+        $config['application'],
+        $gitRepository
+    );
+
+    // Add shared file symlinks.
+
+    if (isset($config['shared_file_symlinks']) && is_array($config['shared_file_symlinks'])) {
+        foreach ($config['shared_file_symlinks'] as $symlinkSource => $symlinkTarget) {
+            $paprika->addSharedFileSymlink($symlinkSource, $symlinkTarget);
+        }
+    }
+
+    // Register plugins.
+
+    if (!empty($config['plugins']) && is_array($config['plugins'])) {
+        foreach ($config['plugins'] as $pluginClass) {
+            if (strpos($pluginClass, '\\Paprika\\Plugin\\') === 0) {
+                $paprika->registerPlugin(new $pluginClass());
+            } else if (file_exists($pluginClass . '.php')) {
+                include_once($pluginClass . '.php');
+                if (class_exists($pluginClass)) {
+                    $paprika->registerPlugin(new $pluginClass());
+                } else {
+                    die('Error: Plugin class ' . $pluginClass . ' does not appear to exist within ' . $pluginClass . '.php!');
+                }
+            } else {
+                die('Error: Plugin ' . $pluginClass . '.php does not exist!');
+            }
+        }
+    }
+
+    // Create & add environments.
+
+    if (isset($config['environments']) && is_array($config['environments'])) {
+
+        foreach ($config['environments'] as $environmentLabel => $environmentConfig) {
+
+            if (!isset($environmentConfig['git_repo_branch']) || empty($environmentConfig['git_repo_branch'])
+                || !isset($environmentConfig['ssh_address']) || empty($environmentConfig['ssh_address'])
+                || !isset($environmentConfig['deploy_dir']) || empty($environmentConfig['deploy_dir']))
+            {
+                continue;
+            }
+
+            $sshConnection = new \Paprika\SshConnection($environmentConfig['ssh_address']);
+
+            if (isset($environmentConfig['ssh_port']) && is_numeric($environmentConfig['ssh_port'])) {
+                $sshConnection->setPort($environmentConfig['ssh_port']);
+            }
+
+            if (isset($environmentConfig['ssh_username']) && !empty($environmentConfig['ssh_username'])) {
+                $sshConnection->setUsername($environmentConfig['ssh_username']);
+            }
+
+            if (isset($environmentConfig['ssh_password']) && !empty($environmentConfig['ssh_password'])) {
+                $sshConnection->setPassword($environmentConfig['ssh_password']);
+            }
+
+            $environment = new Paprika\Environment(
+                $environmentLabel,
+                $environmentConfig['git_repo_branch'],
+                $sshConnection,
+                rtrim($environmentConfig['deploy_dir'], '/')
+            );
+
+            if (isset($environmentConfig['pre_task_commands']) && is_array($environmentConfig['pre_task_commands'])) {
+                foreach ($environmentConfig['pre_task_commands'] as $command) {
+                    if (!empty($command)) {
+                        $environment->addPreTaskCommand($command);
+                    }
+                }
+            }
+
+            $paprika->addEnvironment($environment);
+
+        }
+
+    }
+
+    if (!$paprika->hasEnvironments()) {
+        $consoleOutput->writeln('Error: There are no valid environments set in your Papfile!');
+        exit;
+    }
+
+    // Add console-based message handler.
+
+    $paprika->addMessageHandler(
+        new \Paprika\MessageHandler\ConsoleMessageHandler($consoleOutput),
+        \Paprika\MessageHandler\MessageHandler::TYPE_INFO
+    );
+
+} else {
+
+    // No config means no Paprika application!
+
+    $paprika = null;
+
+}
+
+// Run the console application.
+
+$console = new Paprika\Console\Application($paprika);
+$console->run();

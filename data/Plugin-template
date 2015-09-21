@@ -1,0 +1,59 @@
+<?php
+/**
+ * Paprika plugin.
+ *
+ * @author    David Frame <deframe@cryst.co.uk>
+ * @copyright Copyright (c) David Frame <deframe@cryst.co.uk>
+ */
+class {{{ pluginName }}} implements \Paprika\Plugin\Plugin
+{
+    /**
+     * Plugin initialization.
+     *
+     * @param \Paprika\Application $paprika Paprika instance
+     * @return void
+     */
+    public function init(\Paprika\Application $paprika)
+    {
+        $eventDispatcher = $paprika->getEventDispatcher();
+
+        // Deploy event listeners.
+
+        $eventDispatcher->addListener('task.deploy.started', function(\Paprika\Event\DeployEvent $event) use ($paprika) {
+        });
+
+        $eventDispatcher->addListener('task.deploy.updated_repository', function(\Paprika\Event\DeployEvent $event) use ($paprika) {
+        });
+
+        $eventDispatcher->addListener('task.deploy.created_release', function(\Paprika\Event\DeployEvent $event) use ($paprika) {
+        });
+
+        $eventDispatcher->addListener('task.deploy.created_shared_file_symlinks', function(\Paprika\Event\DeployEvent $event) use ($paprika) {
+        });
+
+        $eventDispatcher->addListener('task.deploy.activated_release', function(\Paprika\Event\DeployEvent $event) use ($paprika) {
+        });
+
+        $eventDispatcher->addListener('task.deploy.removed_old_releases', function(\Paprika\Event\DeployEvent $event) use ($paprika) {
+        });
+
+        $eventDispatcher->addListener('task.deploy.finished', function(\Paprika\Event\DeployEvent $event) use ($paprika) {
+        });
+
+        // Rollback event listeners.
+
+        $eventDispatcher->addListener('task.rollback.started', function(\Paprika\Event\RollbackEvent $event) use ($paprika) {
+        });
+
+        $eventDispatcher->addListener('task.rollback.finished', function(\Paprika\Event\RollbackEvent $event) use ($paprika) {
+        });
+
+        // Status event listeners.
+
+        $eventDispatcher->addListener('task.status.started', function(\Paprika\Event\StatusEvent $event) use ($paprika) {
+        });
+
+        $eventDispatcher->addListener('task.status.finished', function(\Paprika\Event\StatusEvent $event) use ($paprika) {
+        });
+    }
+}

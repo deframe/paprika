@@ -1,0 +1,20 @@
+#!/usr/bin/env php
+<?php
+
+/*
+ * This file is part of the Paprika package.
+ *
+ * (c) David Frame <deframe@cryst.co.uk>
+ *
+ */
+
+include_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'bootstrap.php');
+
+$compiler = new Paprika\Compiler();
+
+$compiler->compile(
+    __DIR__
+    . DIRECTORY_SEPARATOR . '..'
+    . DIRECTORY_SEPARATOR . 'dist'
+    . DIRECTORY_SEPARATOR . 'paprika.phar'
+);
